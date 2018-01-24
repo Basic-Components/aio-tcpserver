@@ -1,2 +1,46 @@
+
 # aio-tcpserver
-执行asyncio.Protocol的tcp服务器,支持多进程执行,代码参考自sanic
+
++ version: 0.0.1
++ status: dev
++ author: hsz
++ email: hsz1273327@gmail.com
+
+## Description
+
+simple tools
+
+
+keywords:tcp-server,asyncio
+
+## Feature
+
++ Feature1
++ Feature2
+
+## Example
+
+```
+
+
+````
+
+## Install
+
+`python -m pip install aio-tcpserver`
+
+
+## Documentation
+
+Documentation on github page <https://github.com/Basic-Components/aio-tcpserver>
+
+
+
+## TODO
+
++ todo
+
+## Limitations
+
++ limit
+
