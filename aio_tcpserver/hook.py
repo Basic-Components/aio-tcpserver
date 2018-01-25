@@ -7,14 +7,18 @@
 * @listener(event) 用于注册协程到钩子
 * trigger_events(events, loop: asyncio.AbstractEventLoop)->None 用于执行钩子
 """
-import asyncio
 import inspect
+import platform
 from typing import (
     List,
     Awaitable,
     Callable
 )
 from .errors import ListenerError
+if platform.system() == "Windows":
+    import aio_windows_patch as asyncio
+else:
+    import asyncio
 LISTENERS = {
     "before_server_start": [],
     "after_server_start": [],

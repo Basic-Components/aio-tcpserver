@@ -4,6 +4,7 @@
 
 """
 import os
+import multiprocessing
 from multiprocessing import Process
 from typing import Dict, Any
 from socket import (
@@ -16,8 +17,9 @@ from signal import (
     signal as signal_func,
     Signals
 )
-from .log import server_logger as logger
+from .errors import MultipleProcessDone
 from .server_single import tcp_serve
+from .log import server_logger as logger
 
 
 def multiple_tcp_serve(server_settings: Dict[str, Any], workers: int)->None:
@@ -28,7 +30,6 @@ def multiple_tcp_serve(server_settings: Dict[str, Any], workers: int)->None:
     Params:
 
         server_settings (Dicct[str, Any]) : - 每个单一进程的设置,
-
         workers (int) : - 执行的进程数
 
     """
@@ -53,12 +54,22 @@ def multiple_tcp_serve(server_settings: Dict[str, Any], workers: int)->None:
             signal (Any) : - 要处理的信号
             frame (Any) : - 执行到的帧
         """
-        logger.info("Received signal %s. Shutting down.", Signals(signal).name)
+        status = []
         for process in processes:
-            os.kill(process.pid, SIGTERM)
+            statu = process.is_alive()
+            status.append(statu)
+            if statu:
+                os.kill(process.pid, SIGTERM)
 
-    signal_func(SIGINT, lambda s, f: sig_handler(s, f))
-    signal_func(SIGTERM, lambda s, f: sig_handler(s, f))
+        if any(status):
+            logger.info(
+                """Received signal {}. Shutting down. You may need to enter Ctrl+C again.
+                """.format(Signals(signal).name))
+        else:
+            raise MultipleProcessDone("all process not alive")
+
+    signal_func(SIGINT, sig_handler)
+    signal_func(SIGTERM, sig_handler)
 
     processes = []
 
@@ -67,11 +78,19 @@ def multiple_tcp_serve(server_settings: Dict[str, Any], workers: int)->None:
         process.daemon = True
         process.start()
         processes.append(process)
+    try:
+        while True:
+            pass
+    except MultipleProcessDone as done:
+        logger.info(str(done))
+    except Exception as e:
+        raise e
+    finally:
+        for process in processes:
+            process.join()
 
-    for process in processes:
-        process.join()
-
-    # 使用join同步后,只有进程运行结束了才关闭子进程
-    for process in processes:
-        process.terminate()
-    server_settings.get('sock').close()
+        # 使用join同步后,只有进程运行结束了才关闭子进程
+        for process in processes:
+            process.terminate()
+        server_settings.get('sock').close()
+        logger.info("Shutting down done.")

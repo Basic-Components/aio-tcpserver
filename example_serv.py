@@ -3,10 +3,10 @@ import time
 from aio_tcpserver import tcp_server, listener
 
 
-# @listener("before_server_start")
-# async def beat(loop):
-#     print(time.time())
-#     print("ping")
+@listener("before_server_start")
+async def beat(loop):
+    print(time.time())
+    print("ping")
 
 
 class EchoServerClientProtocol(asyncio.Protocol):

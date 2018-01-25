@@ -18,7 +18,8 @@ SERVER_CONFIG = {
     "run_multiple": False,
     "connections": None,
     "run_async": False,
-    "graceful_shutdown_timeout": 15.0
+    "graceful_shutdown_timeout": 1.0,
+    "current_time": True
 }
 
 SERVER_LOGGING_CONFIG = {
