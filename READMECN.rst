@@ -15,7 +15,7 @@ Desc
 
 注意只支持python3.6+
 
-asyncio.Protocol的子类可以在__init__方法中带有username,password,signal参数用于设置用户名密码和中断信号.
+asyncio.Protocol的子类可以在__init__方法中带有username,password,signal,collections参数用于设置用户名密码和中断信号.
 
 
 

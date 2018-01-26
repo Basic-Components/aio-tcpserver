@@ -106,6 +106,7 @@ def tcp_serve(host: str, port: int,
     # 管理连接,
     connections = connections if connections is not None else set()
     # 为协议添加与服务器相关的参数
+    serv_protocol = partial(serv_protocol, connections=connections)
     if signal:
         serv_protocol = partial(serv_protocol, signal=signal)
     if username:
