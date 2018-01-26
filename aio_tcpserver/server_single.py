@@ -35,7 +35,16 @@ from signal import (
     signal as signal_func
 )
 if platform.system() == "Windows":
-    import aio_windows_patch as asyncio
+    try:
+        import aio_windows_patch as asyncio
+    except:
+        import warnings
+        warnings.warn(
+            "you should install aio_windows_patch to support windows",
+            RuntimeWarning,
+            stacklevel=3)
+        import asyncio
+
 else:
     import asyncio
 try:
@@ -47,12 +56,14 @@ except ImportError:
 
 def tcp_serve(host: str, port: int,
               serv_protocol: asyncio.Protocol, *,
+              username: Optional[str]=None,
+              password: Optional[str]=None,
+              signal: Optional[Signal]=None,
               loop: asyncio.AbstractEventLoop=None,
               ssl: Optional[SSLContext]=None,
               reuse_port: bool=False,
               sock: Optional[socket]=None,
               backlog: int=100,
-              signal: Optional[Signal]=None,
               debug: bool=False,
               run_multiple: bool = False,
               connections: set=None,
@@ -94,6 +105,13 @@ def tcp_serve(host: str, port: int,
 
     # 管理连接,
     connections = connections if connections is not None else set()
+    # 为协议添加与服务器相关的参数
+    if signal:
+        serv_protocol = partial(serv_protocol, signal=signal)
+    if username:
+        serv_protocol = partial(serv_protocol, username=username)
+    if password:
+        serv_protocol = partial(serv_protocol, password=password)
     server_coroutine = loop.create_server(
         serv_protocol,
         host,

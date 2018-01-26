@@ -16,7 +16,16 @@ from typing import (
 )
 from .errors import ListenerError
 if platform.system() == "Windows":
-    import aio_windows_patch as asyncio
+    try:
+        import aio_windows_patch as asyncio
+    except:
+        import warnings
+        warnings.warn(
+            "you should install aio_windows_patch to support windows",
+            RuntimeWarning,
+            stacklevel=3)
+        import asyncio
+
 else:
     import asyncio
 LISTENERS = {

@@ -9,6 +9,8 @@
 SERVER_CONFIG = {
     "host": "0.0.0.0",
     "port": 5000,
+    "username": None,
+    "password": None,
     "loop": None,
     "ssl": None,
     "reuse_port": False,

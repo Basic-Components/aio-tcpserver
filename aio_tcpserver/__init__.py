@@ -14,12 +14,23 @@ from .log import server_logger as logger
 from .config import SERVER_CONFIG, SERVER_LOGGING_CONFIG
 
 if platform.system() == "Windows":
-    import aio_windows_patch as asyncio
+    try:
+        import aio_windows_patch as asyncio
+    except:
+        import warnings
+        warnings.warn(
+            "you should install aio_windows_patch to support windows",
+            RuntimeWarning,
+            stacklevel=3)
+        import asyncio
+
 else:
     import asyncio
 
 SETABLE = ("host",
            "port",
+           "username",
+           "password",
            "loop",
            "ssl",
            "reuse_port",
@@ -36,7 +47,7 @@ def tcp_server(
         serv_protocol: asyncio.Protocol, *,
         signal: Signal=Signal(),
         worker: int=None,
-        costume_config: Optional[Dict[str, Any]]=None,
+        costume_config: Optional[Dict[str, Any]]=None, *,
         **kwargs):
     """tcp服务器.
 
@@ -50,7 +61,8 @@ def tcp_server(
 
         host (str) : - 主机地址
         port (int) : - 主机端口
-        serv_protocol (asyncio.Protocol) : - 协议类,需要有signal字段用于保存控制是否停止的信号实例
+        serv_protocol (asyncio.Protocol) : - 协议类,需要有signal字段用于保存控制是否停止的信号实例,\
+需要__init__方法中有参数`signal`,`username`,`password`
         loop (asyncio.AbstractEventLoop) : - 服务要使用的事件循环
         ssl (Optional[ssl.SSLContext]) : 使用ssl默认值为None
         reuse_port (bool) : - 是否重用端口默认为False
@@ -80,7 +92,7 @@ def tcp_server(
         "serv_protocol": serv_protocol,
         "signal": signal,
     })
-    
+
     for i in SETABLE:
         if kwargs.get(i) is not None:
             server_config.update({

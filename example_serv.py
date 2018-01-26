@@ -27,7 +27,7 @@ class EchoServerClientProtocol(asyncio.Protocol):
 
 
 def main():
-    tcp_server(EchoServerClientProtocol,worker=3)
+    tcp_server(EchoServerClientProtocol, worker=3)
 
 
 if __name__ == '__main__':
