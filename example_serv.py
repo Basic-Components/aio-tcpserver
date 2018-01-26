@@ -1,4 +1,18 @@
-import asyncio
+import platform
+if platform.system() == "Windows":
+    try:
+        import aio_windows_patch as asyncio
+    except:
+        import warnings
+        warnings.warn(
+            "you should install aio_windows_patch to support windows",
+            RuntimeWarning,
+            stacklevel=3)
+        import asyncio
+
+else:
+    import asyncio
+
 import time
 from aio_tcpserver import tcp_server, listener
 
@@ -21,13 +35,14 @@ class EchoServerClientProtocol(asyncio.Protocol):
 
         print('Send: {!r}'.format(message))
         self.transport.write(data)
+        print("################")
 
         print('Close the client socket')
         self.transport.close()
 
 
 def main():
-    tcp_server(EchoServerClientProtocol, worker=3)
+    tcp_server(EchoServerClientProtocol, signal=None, worker=None, port=5678)
 
 
 if __name__ == '__main__':
