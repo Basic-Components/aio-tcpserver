@@ -45,7 +45,7 @@ HOOK_REVERSE = (
 def listener(event: str)->Callable:
     """装饰器,用于装饰协程来为服务器注册钩子.
 
-    Params:
+    Parameters
 
         event (str): - 注册的钩子类型
     """

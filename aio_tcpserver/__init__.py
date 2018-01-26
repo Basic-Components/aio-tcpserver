@@ -56,25 +56,40 @@ def tcp_server(
 
     用户自定义设置具体参看config模块
 
-    Params:
+    Parameters:
 
-        host (str) : - 主机地址
-        port (int) : - 主机端口
-        serv_protocol (asyncio.Protocol) : - 协议类,需要有signal字段用于保存控制是否停止的信号实例,\
+        host (str): - 主机地址
+
+        port (int): - 主机端口
+
+        serv_protocol (asyncio.Protocol): - 协议类,需要有signal字段用于保存控制是否停止的信号实例,\
 需要__init__方法中有参数`signal`,`username`,`password`
-        loop (asyncio.AbstractEventLoop) : - 服务要使用的事件循环
-        ssl (Optional[ssl.SSLContext]) : 使用ssl默认值为None
-        reuse_port (bool) : - 是否重用端口默认为False
-        sock (Optional[socket]) : - 指定套接字默认为None,注意如果用socket,host和port就必须为None
-        backlog (int) :- 传递给队列的最大连接数,默认为100,
-        signal (Optional[Signal]) : - 与协议中公用的一个信号,用于关闭协议,需要有stopped字段 默认为None,
-        debug (bool) : - 是否要使用debug模式
-        run_multiple (bool) : - 是否是多进程模式默认为False
-        run_async (bool) : - 当设置为true的时候将创建的服务器协程返回,而不是执行这个协程,默认为False,
-        connections (Optional[set]) : - 可以设定一个装载连接的容器,默认为None
-        graceful_shutdown_timeout (float) : - 是否在关闭前等待一段时间,默认为15.0s
-        current_time (bool) : - 是否使用一个全局变量来维护当前时间
-        costume_config (Optional[Dict[str, Any]]) : - 用户自定义设置
+
+        loop (asyncio.AbstractEventLoop): - 服务要使用的事件循环
+
+        ssl (Optional[ssl.SSLContext]): - 使用ssl默认值为None
+
+        reuse_port (bool): - 是否重用端口默认为False
+
+        sock (Optional[socket]): - 指定套接字默认为None,注意如果用socket,host和port就必须为None
+
+        backlog (int): - 传递给队列的最大连接数,默认为100,
+
+        signal (Optional[Signal]): - 与协议中公用的一个信号,用于关闭协议,需要有stopped字段 默认为None,
+
+        debug (bool): - 是否要使用debug模式
+
+        run_multiple (bool): - 是否是多进程模式默认为False
+
+        run_async (bool): - 当设置为true的时候将创建的服务器协程返回,而不是执行这个协程,默认为False,
+
+        connections (Optional[set]): - 可以设定一个装载连接的容器,默认为None
+
+        graceful_shutdown_timeout (float): - 是否在关闭前等待一段时间,默认为15.0s
+
+        current_time (bool): - 是否使用一个全局变量来维护当前时间
+
+        costume_config (Optional[Dict[str, Any]]): - 用户自定义设置
     """
     server_config = SERVER_CONFIG
     server_logging_config = SERVER_LOGGING_CONFIG
