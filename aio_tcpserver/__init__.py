@@ -47,8 +47,7 @@ def tcp_server(
         serv_protocol: asyncio.Protocol, *,
         signal: Signal=Signal(),
         worker: int=None,
-        costume_config: Optional[Dict[str, Any]]=None, *,
-        **kwargs):
+        costume_config: Optional[Dict[str, Any]]=None, **kwargs):
     """tcp服务器.
 
     用户可以自己在costume_config中指定设置,也可以利用关键字指定设置,优先顺序是:

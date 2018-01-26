@@ -13,7 +13,9 @@ aio-tcpserver
 Desc
 --------------------------------
 
-A tcp sever for running `asyncio.Protocol`. The inspiration comes from sanic
+A tcp sever for running `asyncio.Protocol`. The inspiration comes from sanic,
+
+only support python 3.6+
 
 
 keywords:tcp-server,asyncio

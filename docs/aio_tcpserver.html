@@ -1,0 +1,147 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>aio-tcpserver package &#8212; aio-tcpserver  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="欢迎来到aio-tcpserver的文档" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="aio-tcpserver-package">
+<h1>aio-tcpserver package<a class="headerlink" href="#aio-tcpserver-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-aio_tcpserver">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-aio_tcpserver" title="Permalink to this headline">¶</a></h2>
+<p>aio_tcpserver.</p>
+<p>&#64;copyright 2017, hsz MIT License
+&#64;desc 一个简单的TCP服务器用于执行asyncio.Protocol的子类定义的协议,代码参考自sanic</p>
+<dl class="function">
+<dt id="aio_tcpserver.listener">
+<code class="descclassname">aio_tcpserver.</code><code class="descname">listener</code><span class="sig-paren">(</span><em>event: str</em><span class="sig-paren">)</span> &#x2192; typing.Callable<a class="reference internal" href="_modules/aio_tcpserver/hook.html#listener"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aio_tcpserver.listener" title="Permalink to this definition">¶</a></dt>
+<dd><p>装饰器,用于装饰协程来为服务器注册钩子.</p>
+<p>Params:</p>
+<blockquote>
+<div>event (str): - 注册的钩子类型</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="aio_tcpserver.tcp_server">
+<code class="descclassname">aio_tcpserver.</code><code class="descname">tcp_server</code><span class="sig-paren">(</span><em>serv_protocol: aio_windows_patch.protocols.Protocol, *, signal: aio_tcpserver.utils.Signal = &lt;aio_tcpserver.utils.Signal object&gt;, worker: int = None, costume_config: typing.Union[typing.Dict[str, typing.Any], NoneType] = None, **kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aio_tcpserver.html#tcp_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aio_tcpserver.tcp_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>tcp服务器.</p>
+<p>用户可以自己在costume_config中指定设置,也可以利用关键字指定设置,优先顺序是:</p>
+<p>关键字 &gt; 用户自定义设置 &gt; 默认</p>
+<p>用户自定义设置具体参看config模块</p>
+<p>Params:</p>
+<blockquote>
+<div>host (str) : - 主机地址
+port (int) : - 主机端口
+serv_protocol (asyncio.Protocol) : - 协议类,需要有signal字段用于保存控制是否停止的信号实例,需要__init__方法中有参数`signal`,`username`,`password`
+loop (asyncio.AbstractEventLoop) : - 服务要使用的事件循环
+ssl (Optional[ssl.SSLContext]) : 使用ssl默认值为None
+reuse_port (bool) : - 是否重用端口默认为False
+sock (Optional[socket]) : - 指定套接字默认为None,注意如果用socket,host和port就必须为None
+backlog (int) :- 传递给队列的最大连接数,默认为100,
+signal (Optional[Signal]) : - 与协议中公用的一个信号,用于关闭协议,需要有stopped字段 默认为None,
+debug (bool) : - 是否要使用debug模式
+run_multiple (bool) : - 是否是多进程模式默认为False
+run_async (bool) : - 当设置为true的时候将创建的服务器协程返回,而不是执行这个协程,默认为False,
+connections (Optional[set]) : - 可以设定一个装载连接的容器,默认为None
+graceful_shutdown_timeout (float) : - 是否在关闭前等待一段时间,默认为15.0s
+current_time (bool) : - 是否使用一个全局变量来维护当前时间
+costume_config (Optional[Dict[str, Any]]) : - 用户自定义设置</div></blockquote>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">aio-tcpserver package</a><ul>
+<li><a class="reference internal" href="#module-aio_tcpserver">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">欢迎来到aio-tcpserver的文档</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/aio_tcpserver.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, hsz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/aio_tcpserver.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

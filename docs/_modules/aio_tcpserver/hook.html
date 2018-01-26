@@ -1,0 +1,170 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>aio_tcpserver.hook &#8212; aio-tcpserver  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for aio_tcpserver.hook</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;定义钩子相关的操作和设定.</span>
+
+<span class="sd">钩子接受参数为loop的协程函数用于注册</span>
+
+<span class="sd">包括:</span>
+
+<span class="sd">* @listener(event) 用于注册协程到钩子</span>
+<span class="sd">* trigger_events(events, loop: asyncio.AbstractEventLoop)-&gt;None 用于执行钩子</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">Awaitable</span><span class="p">,</span>
+    <span class="n">Callable</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.errors</span> <span class="k">import</span> <span class="n">ListenerError</span>
+<span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">aio_windows_patch</span> <span class="k">as</span> <span class="nn">asyncio</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">warnings</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;you should install aio_windows_patch to support windows&quot;</span><span class="p">,</span>
+            <span class="ne">RuntimeWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="kn">import</span> <span class="nn">asyncio</span>
+
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="n">LISTENERS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;before_server_start&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s2">&quot;after_server_start&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s2">&quot;before_server_stop&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s2">&quot;after_server_stop&quot;</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">}</span>
+<span class="n">HOOK_REVERSE</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span><span class="s2">&quot;before_server_start&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;after_server_start&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;before_server_stop&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;after_server_stop&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="listener"><a class="viewcode-back" href="../../aio_tcpserver.html#aio_tcpserver.listener">[docs]</a><span class="k">def</span> <span class="nf">listener</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Callable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;装饰器,用于装饰协程来为服务器注册钩子.</span>
+
+<span class="sd">    Params:</span>
+
+<span class="sd">        event (str): - 注册的钩子类型</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">event</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">LISTENERS</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="n">ListenerError</span><span class="p">(</span><span class="s2">&quot;Illegal hook&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">listener</span><span class="p">:</span> <span class="n">Awaitable</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Awaitable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;装饰函数,装饰一个协程函数.</span>
+
+<span class="sd">        Params:</span>
+
+<span class="sd">        listener (Awaitable): - 注册的钩子</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">iscoroutinefunction</span><span class="p">(</span><span class="n">listener</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ListenerError</span><span class="p">(</span>
+                <span class="s2">&quot;Illegal listener,&quot;</span>
+                <span class="s2">&quot;listener must be a coroutinefunction&quot;</span><span class="p">)</span>
+        <span class="n">LISTENERS</span><span class="p">[</span><span class="n">event</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">listener</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">listener</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+<span class="k">def</span> <span class="nf">trigger_events</span><span class="p">(</span><span class="n">events</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Awaitable</span><span class="p">],</span> <span class="n">loop</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">AbstractEventLoop</span><span class="p">)</span><span class="o">-&gt;</span><span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;用于执行钩子操作.</span>
+
+<span class="sd">    Params:</span>
+<span class="sd">        events (List[Awaitable]): - 钩子要执行的协程函数队列</span>
+<span class="sd">        loop (): - 事件循环</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">event</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isawaitable</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+            <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../aio_tcpserver.html">aio_tcpserver</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, hsz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
