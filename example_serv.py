@@ -37,12 +37,12 @@ class EchoServerClientProtocol(asyncio.Protocol):
         self.transport.write(data)
         print("################")
 
-        #print('Close the client socket')
-        #self.transport.close()
+        print('Close the client socket')
+        self.transport.close()
 
 
 def main():
-    tcp_server(EchoServerClientProtocol, signal=None, worker=None, port=5678)
+    tcp_server(EchoServerClientProtocol, signal=None, worker=3, port=5678)
 
 
 if __name__ == '__main__':
