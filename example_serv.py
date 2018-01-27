@@ -37,8 +37,8 @@ class EchoServerClientProtocol(asyncio.Protocol):
         self.transport.write(data)
         print("################")
 
-        print('Close the client socket')
-        self.transport.close()
+        #print('Close the client socket')
+        #self.transport.close()
 
 
 def main():

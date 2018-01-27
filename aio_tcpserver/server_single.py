@@ -23,17 +23,27 @@ import platform
 from ssl import SSLContext
 from socket import socket
 from functools import partial
+import warnings
 from typing import (
     Optional
 )
 from .log import server_logger as logger
-from .utils import Signal, update_current_time
-from .hook import LISTENERS, HOOK_REVERSE, trigger_events
+from .utils import (
+    Signal,
+    update_current_time,
+    get_protocol_params
+)
+from .hook import (
+    LISTENERS,
+    HOOK_REVERSE,
+    trigger_events
+)
 from signal import (
     SIGTERM, SIGINT,
     SIG_IGN,
     signal as signal_func
 )
+
 if platform.system() == "Windows":
     try:
         import aio_windows_patch as asyncio
@@ -54,7 +64,8 @@ except ImportError:
     pass
 
 
-def tcp_serve(host: str, port: int,
+def tcp_serve(host: str,
+              port: int,
               serv_protocol: asyncio.Protocol, *,
               username: Optional[str]=None,
               password: Optional[str]=None,
@@ -106,13 +117,37 @@ def tcp_serve(host: str, port: int,
     # 管理连接,
     connections = connections if connections is not None else set()
     # 为协议添加与服务器相关的参数
-    serv_protocol = partial(serv_protocol, connections=connections)
+    protocol_params = get_protocol_params(serv_protocol)
+    if connections:
+        if 'connections' in protocol_params:
+            serv_protocol = partial(serv_protocol, connections=connections)
     if signal:
-        serv_protocol = partial(serv_protocol, signal=signal)
+        if 'signal' in protocol_params:
+            serv_protocol = partial(serv_protocol, signal=signal)
+        else:
+            warnings.warn(
+                "protocol do not has param 'signal' ",
+                RuntimeWarning,
+                stacklevel=3)
+
     if username:
-        serv_protocol = partial(serv_protocol, username=username)
+        if 'username' in protocol_params:
+            serv_protocol = partial(serv_protocol, username=username)
+        else:
+            warnings.warn(
+                "protocol do not has param 'username' ",
+                RuntimeWarning,
+                stacklevel=3)
+
     if password:
-        serv_protocol = partial(serv_protocol, password=password)
+        if 'password' in protocol_params:
+            serv_protocol = partial(serv_protocol, password=password)
+        else:
+            warnings.warn(
+                "protocol do not has param 'password' ",
+                RuntimeWarning,
+                stacklevel=3)
+
     server_coroutine = loop.create_server(
         serv_protocol,
         host,
@@ -171,7 +206,8 @@ def tcp_serve(host: str, port: int,
         loop.run_until_complete(rpc_server.wait_closed())
         # 关闭连接
         # 完成所有空转连接的关闭工作
-        signal.stopped = True
+        if signal:
+            signal.stopped = True
         for connection in connections:
             connection.close_if_idle()
 
