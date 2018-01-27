@@ -20,7 +20,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.6',
     'Topic :: Documentation :: Sphinx',
 ]
-KEYWORDS = ("tcp-server", "asyncio",)
+KEYWORDS = ["tcp-server", "asyncio"]
 PACKAGES = find_packages(exclude=['contrib', 'docs', 'test'])
 ZIP_SAFE = False
 
