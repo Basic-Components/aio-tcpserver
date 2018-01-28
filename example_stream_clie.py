@@ -39,7 +39,7 @@ class EchoClientProtocol(asyncio.StreamReaderProtocol):
             "test": 123,
             'conn': True
         }
-        print("send init message")
+        print("send init message ")
         self._stream_writer.write(msgpack.packb(request) + b"##end##")
         await self._stream_writer.drain()
 
