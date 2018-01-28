@@ -6,7 +6,7 @@
 欢迎来到aio-tcpserver的文档
 =========================================
 
-* version: 0.0.2
+* version: 0.0.3
 * status: dev
 * author: hsz
 * email: hsz1273327@gmail.com

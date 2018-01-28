@@ -67,8 +67,6 @@ except ImportError:
 def tcp_serve(host: str,
               port: int,
               serv_protocol: asyncio.Protocol, *,
-              username: Optional[str]=None,
-              password: Optional[str]=None,
               signal: Optional[Signal]=None,
               loop: asyncio.AbstractEventLoop=None,
               ssl: Optional[SSLContext]=None,
@@ -127,24 +125,6 @@ def tcp_serve(host: str,
         else:
             warnings.warn(
                 "protocol do not has param 'signal' ",
-                RuntimeWarning,
-                stacklevel=3)
-
-    if username:
-        if 'username' in protocol_params:
-            serv_protocol = partial(serv_protocol, username=username)
-        else:
-            warnings.warn(
-                "protocol do not has param 'username' ",
-                RuntimeWarning,
-                stacklevel=3)
-
-    if password:
-        if 'password' in protocol_params:
-            serv_protocol = partial(serv_protocol, password=password)
-        else:
-            warnings.warn(
-                "protocol do not has param 'password' ",
                 RuntimeWarning,
                 stacklevel=3)
 
